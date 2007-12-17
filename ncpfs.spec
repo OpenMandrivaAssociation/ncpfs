@@ -22,7 +22,6 @@ Requires(postun):	/bin/sed /bin/grep
 Requires:	ipxutils
 Requires:	%{libname} = %{version}-%{release}
 BuildRequires:	pam-devel
-Buildroot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 Ncpfs is a filesystem which understands the Novell NetWare(TM)
