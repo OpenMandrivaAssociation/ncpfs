@@ -1,11 +1,12 @@
-%define	major 2.3
-%define	libname	%mklibname %{name} %{major}
+%define	major		2.3
+%define	libname		%mklibname %{name} %{major}
+%define develname	%mklibname %{name} -d
 
 Summary:	Utilities for the ncpfs filesystem, a NetWare client for Linux
 Name:		ncpfs
 Version:	2.2.6
-Release:	%mkrel 3
-License:	GPL
+Release:	%mkrel 4
+License:	GPLv2+
 Group:		Networking/Other
 URL:		ftp://platan.vc.cvut.cz/pub/linux/ncpfs/
 Source0:	ftp://platan.vc.cvut.cz/pub/linux/ncpfs/%{name}-%{version}/%{name}-%{version}.tar.bz2
@@ -17,8 +18,6 @@ Patch6:		ncpfs-2.2.4-gcc4.patch
 Patch7:		ncpfs-2.2.6-ldconfig.patch
 Patch8:		ncpfs-2.2.6-align.patch
 Patch9:		ncpfs-2.2.6-add-missing-header.patch
-Requires(post):	/bin/sed /bin/grep
-Requires(postun):	/bin/sed /bin/grep
 Requires:	ipxutils
 Requires:	%{libname} = %{version}-%{release}
 BuildRequires:	pam-devel
@@ -53,18 +52,17 @@ Group:		System/Libraries
 %description -n	%{libname}
 This library is mandatory for ncpfs and ipxutils to run.
 
-%package -n	%{libname}-devel
+%package -n	%{develname}
 Summary:	Development package with static libs and headers
 Group:		Development/C
 Requires:	%{libname} = %{version}-%{release}
-Provides:	lib%{name}-devel = %{version}-%{release}
-Provides:	%{name}-devel = %{version}-%{release} 
+Provides:	%{name}-devel = %{version}-%{release}
+Obsoletes:	%{mklibname ncpfs 2.3 -d}
 
-%description -n	%{libname}-devel
+%description -n	%{develname}
 Static libraries and header files required for compiling xmms plugins.
 
 %prep
-
 %setup -q
 %patch0 -p1 -b .fix
 %patch1 -p1 -b .array
@@ -148,7 +146,7 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 %{_mandir}/man5/*
 %{_mandir}/man8/*
-%doc BUGS COPYING Changes FAQ README
+%doc BUGS Changes FAQ README
 
 %files -n ipxutils
 %defattr(-,root,root)
@@ -160,15 +158,13 @@ rm -rf %{buildroot}
 
 %files -n %{libname}
 %defattr(-,root,root)
-%doc COPYING
 /lib/security/*
 %{_libdir}/libncp.so.*
 
-%files -n %{libname}-devel
+%files -n %{develname}
 %defattr(-,root,root)
-%doc COPYING Changes
+%doc Changes
 %{_libdir}/lib*.so
 %{_libdir}/lib*.a
 %{_includedir}/*
-
 
