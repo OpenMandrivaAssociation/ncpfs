@@ -18,6 +18,9 @@ Patch6:		ncpfs-2.2.4-gcc4.patch
 Patch7:		ncpfs-2.2.6-ldconfig.patch
 Patch8:		ncpfs-2.2.6-align.patch
 Patch9:		ncpfs-2.2.6-add-missing-header.patch
+# From Fedora: fixes compilation failure (see Debian bug 428937)
+# - AdamW 2007/12
+Patch10:	ncpfs-2.2.6-offsetof.patch
 Requires:	ipxutils
 Requires:	%{libname} = %{version}-%{release}
 BuildRequires:	pam-devel
@@ -72,6 +75,7 @@ Static libraries and header files required for compiling xmms plugins.
 %patch7 -p1 -b .ld
 %patch8 -p1 -b .align
 %patch9 -p1 -b .header
+%patch10 -p1 -b .offset
 
 chmod +rw -R .
 
