@@ -5,7 +5,7 @@
 Summary:	Utilities for the ncpfs filesystem, a NetWare client for Linux
 Name:		ncpfs
 Version:	2.2.6
-Release:	%mkrel 5
+Release:	%mkrel 6
 License:	GPLv2+
 Group:		Networking/Other
 URL:		ftp://platan.vc.cvut.cz/pub/linux/ncpfs/
@@ -79,6 +79,9 @@ Static libraries and header files required for compiling xmms plugins.
 %patch10 -p1 -b .offset
 
 chmod +rw -R .
+
+# lib64 fix
+perl -pi -e "s|/lib/security\b|/%{_lib}/security|g" configure*
 
 %build
 chmod -R u+w po
@@ -167,7 +170,7 @@ rm -rf %{buildroot}
 
 %files -n %{libname}
 %defattr(-,root,root)
-/lib/security/*
+/%{_lib}/security/*
 %{_libdir}/libncp.so.*
 
 %files -n %{develname}
@@ -176,4 +179,3 @@ rm -rf %{buildroot}
 %{_libdir}/lib*.so
 %{_libdir}/lib*.a
 %{_includedir}/*
-
