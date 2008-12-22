@@ -5,7 +5,7 @@
 Summary:	Utilities for the ncpfs filesystem, a NetWare client for Linux
 Name:		ncpfs
 Version:	2.2.6
-Release:	%mkrel 6
+Release:	%mkrel 7
 License:	GPLv2+
 Group:		Networking/Other
 URL:		ftp://platan.vc.cvut.cz/pub/linux/ncpfs/
@@ -21,6 +21,7 @@ Patch9:		ncpfs-2.2.6-add-missing-header.patch
 # From Fedora: fixes compilation failure (see Debian bug 428937)
 # - AdamW 2007/12
 Patch10:	ncpfs-2.2.6-offsetof.patch
+Patch11:	ncpfs-2.2.6-LDFLAGS.diff
 Requires:	ipxutils
 Requires:	%{libname} = %{version}-%{release}
 BuildRequires:	pam-devel
@@ -77,6 +78,7 @@ Static libraries and header files required for compiling xmms plugins.
 %patch8 -p1 -b .align
 %patch9 -p1 -b .header
 %patch10 -p1 -b .offset
+%patch11 -p1 -b .LDFLAGS
 
 chmod +rw -R .
 
@@ -85,12 +87,16 @@ perl -pi -e "s|/lib/security\b|/%{_lib}/security|g" configure*
 
 %build
 chmod -R u+w po
+
 CFLAGS="%{optflags} -fPIC" \
-%configure	--disable-rpath \
-		--enable-pam
+LDFLAGS="%{ldflags}" \
+%configure2_5x \
+    --disable-rpath \
+    --enable-pam
 
 %make clean
 %make
+
 %make -C ipxdump
 mv ipxdump/README ipxdump/README.ipxdump
 
