@@ -5,7 +5,7 @@
 Summary:	Utilities for the ncpfs filesystem, a NetWare client for Linux
 Name:		ncpfs
 Version:	2.2.6
-Release:	%mkrel 7
+Release:	%mkrel 8
 License:	GPLv2+
 Group:		Networking/Other
 URL:		ftp://platan.vc.cvut.cz/pub/linux/ncpfs/
@@ -22,6 +22,7 @@ Patch9:		ncpfs-2.2.6-add-missing-header.patch
 # - AdamW 2007/12
 Patch10:	ncpfs-2.2.6-offsetof.patch
 Patch11:	ncpfs-2.2.6-LDFLAGS.diff
+Patch12:	ncpfs-2.2.6-CVE-2009-3297.diff
 Requires:	ipxutils
 Requires:	%{libname} = %{version}-%{release}
 BuildRequires:	pam-devel
@@ -79,6 +80,7 @@ Static libraries and header files required for compiling xmms plugins.
 %patch9 -p1 -b .header
 %patch10 -p1 -b .offset
 %patch11 -p1 -b .LDFLAGS
+%patch12 -p1 -b .CVE-2009-3297
 
 chmod +rw -R .
 
