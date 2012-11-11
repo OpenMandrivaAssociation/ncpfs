@@ -1,0 +1,203 @@
+Index: ncpfs-2.2.6/sutil/ncplogin.c
+===================================================================
+--- ncpfs-2.2.6.orig/sutil/ncplogin.c
++++ ncpfs-2.2.6/sutil/ncplogin.c
+@@ -934,7 +934,9 @@ ncpipx:;
+ 	NWDSFreeContext(ctx);
+ 	/* ncpmap, ncplogin must write in /etc/mtab */
+ 	{
++		block_sigs();
+ 		add_mnt_entry(mount_name, mount_point, info.flags);
++		unblock_sigs();
+ 	}
+ 	free(mount_name);
+ 	if (info.echo_mnt_pnt) {
+Index: ncpfs-2.2.6/sutil/ncpm_common.c
+===================================================================
+--- ncpfs-2.2.6.orig/sutil/ncpm_common.c
++++ ncpfs-2.2.6/sutil/ncpm_common.c
+@@ -360,7 +360,7 @@ void verify_argv(int argc, char* argv[])
+ #endif 
+ 
+ static inline int ncpm_suser(void) {
+-	return setreuid(-1, 0);
++	return setresuid(0, 0, myuid);
+ }
+ 
+ static int ncpm_normal(void) {
+@@ -368,11 +368,31 @@ static int ncpm_normal(void) {
+ 	int v;
+ 
+ 	e = errno;
+-	v = setreuid(-1, myuid);
++	v = setresuid(myuid, myuid, 0);
+ 	errno = e;
+ 	return v;
+ }
+ 
++void block_sigs(void) {
++
++	sigset_t mask, orig_mask;
++	sigfillset(&mask);
++
++	if(sigprocmask(SIG_SETMASK, &mask, &orig_mask) < 0) {
++		errexit(-1, _("Blocking signals failed.\n"));
++	}
++}
++
++void unblock_sigs(void) {
++
++	sigset_t mask, orig_mask;
++	sigemptyset(&mask);
++
++	if (sigprocmask(SIG_SETMASK, &mask, &orig_mask) < 0) {
++		errexit(-1, _("Un-blocking signals failed.\n"));
++	}
++}
++
+ static int proc_ncpm_mount(const char* source, const char* target, const char* filesystem, unsigned long mountflags, const void* data) {
+ 	int v;
+ 	int e;
+Index: ncpfs-2.2.6/sutil/ncpm_common.h
+===================================================================
+--- ncpfs-2.2.6.orig/sutil/ncpm_common.h
++++ ncpfs-2.2.6/sutil/ncpm_common.h
+@@ -121,6 +121,9 @@ int proc_buildconn(struct ncp_mount_info
+ int proc_aftermount(const struct ncp_mount_info* info, NWCONN_HANDLE* conn);
+ int proc_ncpm_umount(const char* dir);
+ 
++void block_sigs(void);
++void unblock_sigs(void);
++
+ #define UNUSED(x)	x __attribute__((unused))
+ #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+ 
+Index: ncpfs-2.2.6/sutil/ncpmount.c
+===================================================================
+--- ncpfs-2.2.6.orig/sutil/ncpmount.c
++++ ncpfs-2.2.6/sutil/ncpmount.c
+@@ -720,7 +720,9 @@ ncpipx:;
+ 	ncp_close(conn);
+ 
+ 	if (!opt_n) {
++		block_sigs();
+ 		add_mnt_entry(mount_name, mount_point, info.flags);
++		unblock_sigs();
+ 	}
+ 	return 0;
+ }
+Index: ncpfs-2.2.6/sutil/ncpumount.c
+===================================================================
+--- ncpfs-2.2.6.orig/sutil/ncpumount.c
++++ ncpfs-2.2.6/sutil/ncpumount.c
+@@ -86,6 +86,8 @@
+ static char *progname;
+ static int is_ncplogout = 0;
+ 
++uid_t uid;
++
+ static void
+ usage(void)
+ {
+@@ -126,6 +128,40 @@ static void eprintf(const char* message,
+ 	va_end(ap);
+ }
+ 
++/* Mostly copied from ncpm_common.c */
++void block_sigs(void) {
++
++	sigset_t mask, orig_mask;
++	sigfillset(&mask);
++	sigdelset(&mask, SIGALRM); /* Need SIGALRM for ncpumount */
++
++	if(setresuid(0, 0, uid) < 0) {
++		eprintf("Failed to raise privileges.\n");
++		exit(-1);
++	}
++
++	if(sigprocmask(SIG_SETMASK, &mask, &orig_mask) < 0) {
++		eprintf("Blocking signals failed.\n");
++		exit(-1);
++	}
++}
++
++void unblock_sigs(void) {
++
++	sigset_t mask, orig_mask;
++	sigemptyset(&mask);
++
++	if(setresuid(uid, uid, 0) < 0) {
++		eprintf("Failed to drop privileges.\n");
++		exit(-1);
++	}
++
++	if(sigprocmask(SIG_SETMASK, &mask, &orig_mask) < 0) {
++		eprintf("Un-blocking signals failed.\n");
++		exit(-1);
++	}
++}
++
+ static void alarmSignal(int sig) {
+ 	(void)sig;
+ }
+@@ -201,10 +237,13 @@ static int clearMtab (const char* mount_
+ 	if (!numEntries)
+ 		return 0; /* don't waste time ! */
+ 
++	block_sigs();
++
+ 	while ((fd = open(MOUNTED "~", O_RDWR | O_CREAT | O_EXCL, 0600)) == -1) {
+ 		struct timespec tm;
+ 
+ 		if (errno != EEXIST || retries == 0) {
++			unblock_sigs();
+ 			eprintf(_("Can't get %s~ lock file: %s\n"), MOUNTED, strerror(errno));
+ 			return 1;
+ 		}
+@@ -215,6 +254,7 @@ static int clearMtab (const char* mount_
+ 			alarm(0);
+ 			close(fd);
+ 			if (err) {
++				unblock_sigs();
+ 				eprintf(_("Can't lock lock file %s~: %s\n"), MOUNTED, _("Lock timed out"));
+ 				return 1;
+ 			}
+@@ -232,9 +272,11 @@ static int clearMtab (const char* mount_
+ 	err = __clearMtab(mount_points, numEntries);
+ 
+ 	if ((unlink(MOUNTED "~") == -1) && (err == 0)){
++		unblock_sigs();
+ 		eprintf(_("Can't remove %s~"), MOUNTED);
+ 		return 1;
+ 	}
++	unblock_sigs();
+ 	return err;
+ }
+ 
+@@ -422,13 +464,13 @@ do_umount(const char *mount_point)
+ 	int res;
+ 
+ 	if (fid == -1) {
+-		eprintf(_("Could not open %s: %s\n"),
+-			mount_point, strerror(errno));
++		eprintf(_("Invalid or unauthorized mountpoint %s\n"),
++			mount_point);
+ 		return -1;
+ 	}
+ 	if (ncp_get_mount_uid(fid, &mount_uid) != 0) {
+ 		close(fid);
+-		eprintf(_("%s probably not ncp-filesystem\n"),
++		eprintf(_("Invalid or unauthorized mountpoint %s\n"),
+ 			mount_point);
+ 		return -1;
+ 	}
+@@ -591,7 +633,8 @@ main(int argc, char *argv[])
+ 	int allConns = 0;
+ 	const char *serverName = NULL;
+ 	const char *treeName = NULL;
+-	uid_t uid = getuid();
++	
++	uid = getuid();
+ 
+ 	progname = strrchr(argv[0], '/');
+ 	if (progname) {
