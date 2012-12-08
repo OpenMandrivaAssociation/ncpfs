@@ -5,7 +5,7 @@
 Summary:	Utilities for the ncpfs filesystem, a NetWare client for Linux
 Name:		ncpfs
 Version:	2.2.6
-Release:	12
+Release:	13
 License:	GPLv2+
 Group:		Networking/Other
 URL:		ftp://platan.vc.cvut.cz/pub/linux/ncpfs/
@@ -71,6 +71,7 @@ Patch1005:      ncpfs.offsetof.patch
 Patch1006:      ncpfs.mount_hang.patch
 Patch1007:      ncpfs-2.2.6-mount-issue-ver2.patch
 Patch1008:      ncpfs-2_2_6_partial.patch
+Patch1009:      ncpfs-2.2.6-CVE-2011-1679,1680.diff
 Requires:	ipxutils
 Requires:	%{libname} = %{version}-%{release}
 BuildRequires:	pam-devel
@@ -178,6 +179,7 @@ Development files for %{name}
 %patch1006 -p1
 %patch1007 -p1
 %patch1008 -p1
+%patch1009 -p1
 
 chmod +rw -R .
 
@@ -292,3 +294,93 @@ fi
 %doc Changes
 %{_libdir}/lib*.so
 %{_includedir}/*
+
+
+%changelog
+* Tue May 29 2012 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-12
++ Revision: 801086
+- sync patches with upstream (ncpfs-2.2.6-171.161.2.src.rpm)
+- various fixes
+
+* Wed May 04 2011 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-11
++ Revision: 666601
+- mass rebuild
+
+* Fri Dec 03 2010 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-10mdv2011.0
++ Revision: 606814
+- rebuild
+
+* Thu Mar 11 2010 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-9mdv2010.1
++ Revision: 518074
+- P12: security fix for CVE-2010-0788 (was CVE-2009-3297) (redhat)
+- P13: security fix for CVE-2010-0790,0791 (Dan Rosenberg)
+
+* Tue Feb 23 2010 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-8mdv2010.1
++ Revision: 510348
+- P12: security fix for CVE-2009-3297 (redhat)
+
+* Mon Dec 22 2008 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-7mdv2009.1
++ Revision: 317509
+- use %%ldflags
+
+* Wed Jul 23 2008 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-6mdv2009.0
++ Revision: 242622
+- lib64 fixes
+
+* Tue Jun 17 2008 Thierry Vignaud <tv@mandriva.org> 2.2.6-5mdv2009.0
++ Revision: 223337
+- rebuild
+
+  + Pixel <pixel@mandriva.com>
+    - do not call ldconfig in %%post/%%postun, it is now handled by filetriggers
+
+  + Olivier Blin <blino@mandriva.org>
+    - restore BuildRoot
+
+* Fri Dec 21 2007 Adam Williamson <awilliamson@mandriva.org> 2.2.6-4mdv2008.1
++ Revision: 136087
+- add offsetof.patch (from Fedora; fixes build failure, see Debian bug #428937)
+- rebuild for new era
+- don't package unnecessary COPYING
+- new library policy
+- new license policy (pending discussion with Spot about Caldera IPX license)
+
+  + Thierry Vignaud <tv@mandriva.org>
+    - kill re-definition of %%buildroot on Pixel's request
+
+
+* Wed Mar 07 2007 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-3mdv2007.0
++ Revision: 134439
+- Import ncpfs
+
+* Wed Mar 07 2007 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-3mdv2007.1
+- bunzip patches
+
+* Tue Aug 29 2006 Per Øyvind Karlsen <pkarlsen@mandriva.com> 2.2.6-2mdv2007.0
+- compile with -fPIC to fix build on x86_64
+
+* Fri Jun 09 2006 Per Øyvind Karlsen <pkarlsen@mandriva.com> 2.2.6-1mdv2007.0
+- add missing syslog header (P9)
+- fix prereq-use
+- sync with fedora patches (P0-P8)
+- %%mkrel
+
+* Tue Feb 08 2005 Oden Eriksson <oeriksson@mandrakesoft.com> 2.2.6-1mdk
+- 2.2.6
+
+* Wed Dec 29 2004 Oden Eriksson <oeriksson@mandrakesoft.com> 2.2.5-3mdk
+- revert latest "lib64 fixes"
+
+* Wed Dec 29 2004 Oden Eriksson <oeriksson@mandrakesoft.com> 2.2.5-2mdk
+- lib64 fixes
+
+* Fri Dec 03 2004 Per Øyvind Karlsen <peroyvind@linux-mandrake.com> 2.2.5-1mdk
+- 2.2.5
+- use %%configure macro
+
+* Tue Jul 13 2004 Olivier Blin <blino@mandrake.org> 2.2.4-2mdk
+- package missing symlinks, to fix bug 8400
+
+* Thu May 06 2004 Oden Eriksson <oeriksson@mandrakesoft.com> 2.2.4-1mdk
+- 2.2.4
+
