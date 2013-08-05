@@ -1,14 +1,14 @@
 %define	major 2.3
-%define	libname %mklibname %{name} %{major}
-%define develname %mklibname %{name} -d
+%define	libname %mklibname ncp %{major}
+%define devname %mklibname ncp -d
 
 Summary:	Utilities for the ncpfs filesystem, a NetWare client for Linux
 Name:		ncpfs
 Version:	2.2.6
-Release:	13
+Release:	14
 License:	GPLv2+
 Group:		Networking/Other
-URL:		ftp://platan.vc.cvut.cz/pub/linux/ncpfs/
+Url:		ftp://platan.vc.cvut.cz/pub/linux/ncpfs/
 Source0:	ftp://platan.vc.cvut.cz/pub/linux/ncpfs/%{name}-%{version}/%{name}-%{version}.tar.bz2
 Patch403:       ncpfs-hg-commit-403.patch
 Patch404:       ncpfs-hg-commit-404.patch
@@ -73,7 +73,6 @@ Patch1007:      ncpfs-2.2.6-mount-issue-ver2.patch
 Patch1008:      ncpfs-2_2_6_partial.patch
 Patch1009:      ncpfs-2.2.6-CVE-2011-1679,1680.diff
 Requires:	ipxutils
-Requires:	%{libname} = %{version}-%{release}
 BuildRequires:	pam-devel
 
 %description
@@ -101,21 +100,22 @@ Install ipxutils if you need to configure IPX networking on your network.
 %package -n	%{libname}
 Summary:	Library associated with ncpfs
 Group:		System/Libraries
+Obsoletes:	%{_lib}ncpfs2.3 < 2.2.6-14
 
 %description -n	%{libname}
 This library is mandatory for ncpfs and ipxutils to run.
 
-%package -n	%{develname}
+%package -n	%{devname}
 Summary:	Development files for %{name}
 Group:		Development/C
 Requires:	%{libname} = %{version}-%{release}
 Provides:	%{name}-devel = %{version}-%{release}
+Obsoletes:	%{_lib}ncpfs-devel < 2.2.6-14
 
-%description -n	%{develname}
+%description -n	%{devname}
 Development files for %{name}
 
 %prep
-
 %setup -q
 %patch403 -p1
 %patch404 -p1
@@ -192,8 +192,8 @@ chmod -R u+w po
 CFLAGS="%{optflags} -fPIC" \
 LDFLAGS="%{ldflags}" \
 %configure2_5x \
-    --disable-rpath \
-    --enable-pam
+	--disable-rpath \
+	--enable-pam
 
 %make clean
 %make
@@ -202,7 +202,6 @@ LDFLAGS="%{ldflags}" \
 mv ipxdump/README ipxdump/README.ipxdump
 
 %install
-
 mkdir -p %{buildroot}/sbin
 mkdir -p %{buildroot}%{_sbindir}
 mkdir -p %{buildroot}%{_libdir}
@@ -288,99 +287,10 @@ fi
 
 %files -n %{libname}
 /%{_lib}/security/*
-%{_libdir}/libncp.so.*
+%{_libdir}/libncp.so.%{major}*
 
-%files -n %{develname}
+%files -n %{devname}
 %doc Changes
 %{_libdir}/lib*.so
 %{_includedir}/*
-
-
-%changelog
-* Tue May 29 2012 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-12
-+ Revision: 801086
-- sync patches with upstream (ncpfs-2.2.6-171.161.2.src.rpm)
-- various fixes
-
-* Wed May 04 2011 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-11
-+ Revision: 666601
-- mass rebuild
-
-* Fri Dec 03 2010 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-10mdv2011.0
-+ Revision: 606814
-- rebuild
-
-* Thu Mar 11 2010 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-9mdv2010.1
-+ Revision: 518074
-- P12: security fix for CVE-2010-0788 (was CVE-2009-3297) (redhat)
-- P13: security fix for CVE-2010-0790,0791 (Dan Rosenberg)
-
-* Tue Feb 23 2010 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-8mdv2010.1
-+ Revision: 510348
-- P12: security fix for CVE-2009-3297 (redhat)
-
-* Mon Dec 22 2008 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-7mdv2009.1
-+ Revision: 317509
-- use %%ldflags
-
-* Wed Jul 23 2008 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-6mdv2009.0
-+ Revision: 242622
-- lib64 fixes
-
-* Tue Jun 17 2008 Thierry Vignaud <tv@mandriva.org> 2.2.6-5mdv2009.0
-+ Revision: 223337
-- rebuild
-
-  + Pixel <pixel@mandriva.com>
-    - do not call ldconfig in %%post/%%postun, it is now handled by filetriggers
-
-  + Olivier Blin <blino@mandriva.org>
-    - restore BuildRoot
-
-* Fri Dec 21 2007 Adam Williamson <awilliamson@mandriva.org> 2.2.6-4mdv2008.1
-+ Revision: 136087
-- add offsetof.patch (from Fedora; fixes build failure, see Debian bug #428937)
-- rebuild for new era
-- don't package unnecessary COPYING
-- new library policy
-- new license policy (pending discussion with Spot about Caldera IPX license)
-
-  + Thierry Vignaud <tv@mandriva.org>
-    - kill re-definition of %%buildroot on Pixel's request
-
-
-* Wed Mar 07 2007 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-3mdv2007.0
-+ Revision: 134439
-- Import ncpfs
-
-* Wed Mar 07 2007 Oden Eriksson <oeriksson@mandriva.com> 2.2.6-3mdv2007.1
-- bunzip patches
-
-* Tue Aug 29 2006 Per Øyvind Karlsen <pkarlsen@mandriva.com> 2.2.6-2mdv2007.0
-- compile with -fPIC to fix build on x86_64
-
-* Fri Jun 09 2006 Per Øyvind Karlsen <pkarlsen@mandriva.com> 2.2.6-1mdv2007.0
-- add missing syslog header (P9)
-- fix prereq-use
-- sync with fedora patches (P0-P8)
-- %%mkrel
-
-* Tue Feb 08 2005 Oden Eriksson <oeriksson@mandrakesoft.com> 2.2.6-1mdk
-- 2.2.6
-
-* Wed Dec 29 2004 Oden Eriksson <oeriksson@mandrakesoft.com> 2.2.5-3mdk
-- revert latest "lib64 fixes"
-
-* Wed Dec 29 2004 Oden Eriksson <oeriksson@mandrakesoft.com> 2.2.5-2mdk
-- lib64 fixes
-
-* Fri Dec 03 2004 Per Øyvind Karlsen <peroyvind@linux-mandrake.com> 2.2.5-1mdk
-- 2.2.5
-- use %%configure macro
-
-* Tue Jul 13 2004 Olivier Blin <blino@mandrake.org> 2.2.4-2mdk
-- package missing symlinks, to fix bug 8400
-
-* Thu May 06 2004 Oden Eriksson <oeriksson@mandrakesoft.com> 2.2.4-1mdk
-- 2.2.4
 
