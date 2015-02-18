@@ -1,11 +1,11 @@
-%define	major 2.3
-%define	libname %mklibname ncp %{major}
-%define devname %mklibname ncp -d
+%define	major	2.3
+%define	libname	%mklibname ncp %{major}
+%define	devname	%mklibname ncp -d
 
 Summary:	Utilities for the ncpfs filesystem, a NetWare client for Linux
 Name:		ncpfs
 Version:	2.2.6
-Release:	21
+Release:	22
 License:	GPLv2+
 Group:		Networking/Other
 Url:		ftp://platan.vc.cvut.cz/pub/linux/ncpfs/
