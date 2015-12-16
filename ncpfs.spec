@@ -2,6 +2,8 @@
 %define	libname	%mklibname ncp %{major}
 %define	devname	%mklibname ncp -d
 
+%define _disable_lto 1
+
 Summary:	Utilities for the ncpfs filesystem, a NetWare client for Linux
 Name:		ncpfs
 Version:	2.2.6
