@@ -3,6 +3,7 @@
 %define	devname	%mklibname ncp -d
 
 %define _disable_lto 1
+%global optflags %{optflags} -fcommon
 
 Summary:	Utilities for the ncpfs filesystem, a NetWare client for Linux
 Name:		ncpfs
