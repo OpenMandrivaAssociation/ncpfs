@@ -8,7 +8,7 @@
 Summary:	Utilities for the ncpfs filesystem, a NetWare client for Linux
 Name:		ncpfs
 Version:	2.2.6
-Release:	26
+Release:	27
 License:	GPLv2+
 Group:		Networking/Other
 Url:		ftp://platan.vc.cvut.cz/pub/linux/ncpfs/
