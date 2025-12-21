@@ -76,6 +76,11 @@ Patch1007:      ncpfs-2.2.6-mount-issue-ver2.patch
 Patch1008:      ncpfs-2_2_6_partial.patch
 Patch1009:      ncpfs-2.2.6-CVE-2011-1679,1680.diff
 Requires:	ipxutils
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	slibtool
+BuildRequires:	make
 BuildRequires:	pam-devel
 
 %description
